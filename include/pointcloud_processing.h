@@ -6,4 +6,4 @@
 using PointT = pcl::PointXYZRGB;
 using PointCloudT = pcl::PointCloud<PointT>;
 
-void apply_color (PointCloudT::Ptr cloud);
+void apply_color(PointCloudT::Ptr cloud);

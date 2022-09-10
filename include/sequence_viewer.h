@@ -18,21 +18,21 @@
 using PointT = pcl::PointXYZRGB;
 using PointCloudT = pcl::PointCloud<PointT>;
 
-
-class SequenceViewer {
+class SequenceViewer
+{
 public:
     int pcd_len;
     int current_pcd_id;
 
-    SequenceViewer (std::string pcd_path);
+    SequenceViewer(std::string pcd_path);
 
-    void load_pcd_files (const std::string pcd_path);
-    void load_point_cloud (const std::string pcd_file_path);
-    void update_cloud (int pcd_id);
+    void load_pcd_files(const std::string pcd_path);
+    void load_point_cloud(const std::string pcd_file_path);
+    void update_cloud(int pcd_id);
 
-    void showBBox3D ();
+    void showBBox3D();
 
-    int run ();
+    int run();
 
 protected:
     std::vector<std::string> pcd_files;
@@ -40,4 +40,4 @@ protected:
     pcl::visualization::PCLVisualizer::Ptr viewer;
 };
 
-void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event, void* viewer_void);
+void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void *viewer_void);
