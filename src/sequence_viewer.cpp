@@ -1,5 +1,6 @@
 #include "sequence_viewer.h"
 #include "pointcloud_processing.h"
+#include "bbox3d.h"
 
 SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
                                                        current_pcd_id(0)
@@ -15,7 +16,7 @@ SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
     viewer->addPointCloud<PointT>(cloud, "sample cloud");
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
-    // showBBox3D();
+    showBBox3D();
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
 }
@@ -30,7 +31,6 @@ void SequenceViewer::load_pcd_files(const std::string pcd_path)
 
     if (pcd_path.empty() or !bfs::exists(bfs_p))
     {
-        // bfs::filesystem_error file_error (
         std::string message = (boost::format("An argument 'pcd_path : %1%' is empty or doesn't exist!") % pcd_path).str();
         throw std::runtime_error(message);
     }
@@ -112,20 +112,16 @@ void SequenceViewer::update_cloud(int pcd_id)
             this->viewer->updatePointCloud(this->cloud, "sample cloud");
             this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
-            // this->viewer->removeShape("sample cube");
-            // this->showBBox3D();
+            this->viewer->removeShape("sample cube");
+            this->showBBox3D();
         }
     }
 }
 
 void SequenceViewer::showBBox3D()
 {
-    Eigen::Vector3f translation{{0.0, 0.0, 0.0}};
-    Eigen::Quaternionf rotation{0.0, 0.0, 0.0, 1.0};
-    double width = 1.0;
-    double height = 1.0;
-    double depth = 1.0;
-    this->viewer->addCube(translation, rotation, width, height, depth, "sample cube");
+    BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "sample cube"};
+    this->viewer->addCube(sample.translation, sample.rotation, sample.width, sample.height, sample.depth, sample.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sample cube");
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, "sample cube");
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "sample cube");
