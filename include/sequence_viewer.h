@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
+#include <Eigen/Dense>
 #include <pcl/console/parse.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -23,11 +24,13 @@ public:
     int pcd_len;
     int current_pcd_id;
 
-    SequenceViewer(std::string pcd_path);
+    SequenceViewer (std::string pcd_path);
 
     void load_pcd_files (const std::string pcd_path);
     void load_point_cloud (const std::string pcd_file_path);
-    void update_cloud(int pcd_id);
+    void update_cloud (int pcd_id);
+
+    void showBBox3D ();
 
     int run ();
 

@@ -9,13 +9,16 @@ SequenceViewer::SequenceViewer(std::string pcd_path) :
     load_pcd_files (pcd_path);
 
     cloud.reset (new PointCloudT);
-    load_point_cloud(pcd_files[current_pcd_id]);
-    apply_color(cloud);
+    load_point_cloud (pcd_files[current_pcd_id]);
+    apply_color (cloud);
 
     viewer.reset (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (1.0, 1.0, 1.0);
     viewer->addPointCloud<PointT> (cloud, "sample cloud");
     viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
+
+    showBBox3D ();
+
     viewer->registerKeyboardCallback (keyboardEventOccurred, (void*)this);
 }
 
@@ -91,8 +94,23 @@ void SequenceViewer::update_cloud(int pcd_id) {
             pcl::copyPointCloud (*cloud_tmp, *(this->cloud));
             this->viewer->updatePointCloud (this->cloud, "sample cloud");
             this->viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
+
+            this->viewer->removeShape ("sample cube");
+            this->showBBox3D ();
         }
     }
+}
+
+void SequenceViewer::showBBox3D () {
+    Eigen::Vector3f translation {{0.0, 0.0, 0.0}};
+    Eigen::Quaternionf rotation {0.0, 0.0, 0.0, 1.0};
+    double width = 1.0;
+    double height = 1.0;
+    double depth = 1.0;
+    this->viewer->addCube (translation, rotation, width, height, depth, "sample cube");
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sample cube");
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, "sample cube");
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH , 2, "sample cube");
 }
 
 int SequenceViewer::run () {
