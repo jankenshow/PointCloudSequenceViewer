@@ -15,7 +15,7 @@ SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
     viewer->addPointCloud<PointT>(cloud, "sample cloud");
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
-    showBBox3D();
+    // showBBox3D();
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
 }
@@ -112,8 +112,8 @@ void SequenceViewer::update_cloud(int pcd_id)
             this->viewer->updatePointCloud(this->cloud, "sample cloud");
             this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
-            this->viewer->removeShape("sample cube");
-            this->showBBox3D();
+            // this->viewer->removeShape("sample cube");
+            // this->showBBox3D();
         }
     }
 }
