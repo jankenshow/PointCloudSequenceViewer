@@ -14,6 +14,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+#include "bbox3d.h"
+
 using PointT = pcl::PointXYZRGB;
 using PointCloudT = pcl::PointCloud<PointT>;
 
@@ -29,7 +31,7 @@ public:
     void load_point_cloud(const std::string pcd_file_path);
     void update_cloud(int pcd_id);
 
-    void showBBox3D();
+    void showBBox3D(BBox3D &sample);
 
     int run();
 

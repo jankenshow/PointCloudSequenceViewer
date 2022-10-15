@@ -1,6 +1,5 @@
 #include "sequence_viewer.h"
 #include "pointcloud_processing.h"
-#include "bbox3d.h"
 
 SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
                                                        current_pcd_id(0)
@@ -16,7 +15,8 @@ SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
     viewer->addPointCloud<PointT>(cloud, "sample cloud");
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
-    showBBox3D();
+    BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "sample cube"};
+    showBBox3D(sample);
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
 }
@@ -113,14 +113,14 @@ void SequenceViewer::update_cloud(int pcd_id)
             this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
             this->viewer->removeShape("sample cube");
-            this->showBBox3D();
+            BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "sample cube"};
+            this->showBBox3D(sample);
         }
     }
 }
 
-void SequenceViewer::showBBox3D()
+void SequenceViewer::showBBox3D(BBox3D &sample)
 {
-    BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "sample cube"};
     this->viewer->addCube(sample.translation, sample.rotation, sample.width, sample.height, sample.depth, sample.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sample cube");
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, "sample cube");
