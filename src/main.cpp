@@ -7,9 +7,11 @@ int main(int argc, char *argv[])
     namespace bops = boost::program_options;
 
     bops::options_description description("options");
-    description.add_options()("help,h", "show help")("pcd_path,",
-                                                     bops::value<std::string>(),
-                                                     "path to pcd file or directory in which pcd files exist");
+    description.add_options()
+        ("help,h", "show help")
+        ("pcd_path,",
+        bops::value<std::string>(),
+        "path to pcd file or directory in which pcd files exist");
 
     bops::variables_map vm;
     try

@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+// #include <Eigen/Dense>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
@@ -30,6 +31,7 @@ public:
     void load_pcd_files(const std::string pcd_path);
     void load_point_cloud(const std::string pcd_file_path);
     void update_cloud(int pcd_id);
+    void save_pose();
 
     void showBBox3D(BBox3D &sample);
 

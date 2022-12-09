@@ -119,6 +119,15 @@ void SequenceViewer::update_cloud(int pcd_id)
     }
 }
 
+void SequenceViewer::save_pose()
+{
+    // Eigen::Affine3f pose_mat;
+    this->viewer->saveCameraParameters ("temp.cam");
+    // pose_mat = this->viewer->getViewerPose ();
+    // std::cout << pose_mat.translation() << std::endl;
+    // std::cout << pose_mat.rotation() << std::endl;
+}
+
 void SequenceViewer::showBBox3D(BBox3D &sample)
 {
     this->viewer->addCube(sample.translation, sample.rotation, sample.width, sample.height, sample.depth, sample.id);
@@ -156,5 +165,9 @@ void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void 
     {
         new_pcd_id = (seq_viewer->current_pcd_id + seq_viewer->pcd_len - 1) % seq_viewer->pcd_len;
         seq_viewer->update_cloud(new_pcd_id);
+    }
+    else if (event.getKeySym() == "c" && event.keyDown ())
+    {
+        seq_viewer->save_pose();
     }
 }
