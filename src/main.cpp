@@ -11,7 +11,10 @@ int main(int argc, char *argv[])
         ("help,h", "show help")
         ("pcd_path,",
         bops::value<std::string>(),
-        "path to pcd file or directory in which pcd files exist");
+        "path to pcd file or directory in which pcd files exist")
+        ("annotation_path,",
+        bops::value<std::string>(),
+        "path to directory in which annotation files exist");;
 
     bops::variables_map vm;
     try
@@ -47,9 +50,23 @@ int main(int argc, char *argv[])
     {
         std::cout << "usage:\n"
                   << argv[0] << "--pcd_path [path/to/pcd_file]" << std::endl;
+        std::cout << description << std::endl;
     }
 
-    SequenceViewer viewer(pcd_path);
+    std::string annot_path;
+    bool flag_annot;
+    if (vm.count("annotation_path"))
+    {
+        annot_path = vm["annotation_path"].as<std::string>();
+        flag_annot = true;
+    }
+    else 
+    {
+        annot_path = "";
+        flag_annot = false;
+    }
+
+    SequenceViewer viewer(pcd_path, flag_annot, annot_path);
     int res;
     res = viewer.run();
     return res;
