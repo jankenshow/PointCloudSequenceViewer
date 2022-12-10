@@ -26,7 +26,7 @@ public:
     int pcd_len;
     int current_pcd_id;
 
-    SequenceViewer(std::string pcd_path);
+    SequenceViewer(std::string pcd_path, bool flag_annot, std::string annot_path);
 
     void load_pcd_files(const std::string pcd_path);
     void load_point_cloud(const std::string pcd_file_path);
@@ -38,6 +38,8 @@ public:
     int run();
 
 protected:
+    bool flag_annot;
+    std::string annot_path;
     std::vector<std::string> pcd_files;
     PointCloudT::Ptr cloud;
     pcl::visualization::PCLVisualizer::Ptr viewer;

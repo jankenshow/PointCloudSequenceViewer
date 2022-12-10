@@ -1,8 +1,10 @@
 #include "sequence_viewer.h"
 #include "pointcloud_processing.h"
 
-SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
-                                                       current_pcd_id(0)
+SequenceViewer::SequenceViewer(std::string pcd_path, bool flag_annot, std::string annot_path) : pcd_len(0),
+                                                       current_pcd_id(0),
+                                                       flag_annot(flag_annot),
+                                                       annot_path(annot_path)
 {
     load_pcd_files(pcd_path);
 
@@ -112,7 +114,8 @@ void SequenceViewer::update_cloud(int pcd_id)
             this->viewer->updatePointCloud(this->cloud, "sample cloud");
             this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
-            this->viewer->removeShape("sample cube");
+            // this->viewer->removeShape("sample cube");
+            this->viewer->removeAllShapes();
             BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "sample cube"};
             this->showBBox3D(sample);
         }
@@ -128,12 +131,12 @@ void SequenceViewer::save_pose()
     // std::cout << pose_mat.rotation() << std::endl;
 }
 
-void SequenceViewer::showBBox3D(BBox3D &sample)
+void SequenceViewer::showBBox3D(BBox3D &bbox)
 {
-    this->viewer->addCube(sample.translation, sample.rotation, sample.width, sample.height, sample.depth, sample.id);
-    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sample cube");
-    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, "sample cube");
-    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "sample cube");
+    this->viewer->addCube(bbox.translation, bbox.rotation, bbox.width, bbox.height, bbox.depth, bbox.id);
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, bbox.id);
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, bbox.id);
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, bbox.id);
 }
 
 int SequenceViewer::run()
