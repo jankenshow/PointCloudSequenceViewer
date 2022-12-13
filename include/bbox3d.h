@@ -34,7 +34,7 @@ inline bool load_annot(std::string annot_file, std::vector<BBox3D> &bboxes)
             lidar_0.get<float>("Location.x"), lidar_0.get<float>("Location.y"), lidar_0.get<float>("Location.z")
         );
         Eigen::Quaternionf lidar_0_quat(
-            lidar_0.get<float>("Rotation.x"), lidar_0.get<float>("Rotation.y"), lidar_0.get<float>("Rotation.z"), lidar_0.get<float>("Rotation.w")
+            lidar_0.get<float>("Rotation.w"), lidar_0.get<float>("Rotation.x"), lidar_0.get<float>("Rotation.y"), lidar_0.get<float>("Rotation.z")
         );
 
         int count = 0;
@@ -45,7 +45,7 @@ inline bool load_annot(std::string annot_file, std::vector<BBox3D> &bboxes)
                 info.get<float>("Origin.x"), info.get<float>("Origin.y"), info.get<float>("Origin.z")
             );
             Eigen::Quaternionf bbox_rot(
-                info.get<float>("Rotation.x"), info.get<float>("Rotation.y"), info.get<float>("Rotation.z"), info.get<float>("Rotation.w")
+                info.get<float>("Rotation.w"), info.get<float>("Rotation.x"), info.get<float>("Rotation.y"), info.get<float>("Rotation.z")
             );
             Eigen::Vector3f bbox_center_lidar_coord = lidar_0_quat * (bbox_center - lidar_0_trans);
             Eigen::Quaternionf bbox_rot_lidar_coord = lidar_0_quat * bbox_rot;
