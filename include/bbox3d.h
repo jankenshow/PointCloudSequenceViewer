@@ -47,13 +47,13 @@ inline bool load_annot(std::string annot_file, std::vector<BBox3D> &bboxes)
             Eigen::Quaternionf bbox_rot(
                 info.get<float>("Rotation.w"), info.get<float>("Rotation.x"), info.get<float>("Rotation.y"), info.get<float>("Rotation.z")
             );
-            Eigen::Vector3f bbox_center_lidar_coord = lidar_0_quat * (bbox_center - lidar_0_trans);
-            Eigen::Quaternionf bbox_rot_lidar_coord = lidar_0_quat * bbox_rot;
+            Eigen::Vector3f bbox_center_lidar_coord = lidar_0_quat.inverse() * (bbox_center - lidar_0_trans);
+            Eigen::Quaternionf bbox_rot_lidar_coord = lidar_0_quat.inverse() * bbox_rot;
 
             float width, height, depth;
             width = info.get<float>("Extent.x");
-            height = info.get<float>("Extent.z");
-            depth = info.get<float>("Extent.y");
+            height = info.get<float>("Extent.y");
+            depth = info.get<float>("Extent.z");
 
             std::string id = info.get<std::string>("Label") + "_";
             id += std::to_string(count);
