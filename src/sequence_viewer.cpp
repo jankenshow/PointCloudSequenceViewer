@@ -16,9 +16,25 @@ SequenceViewer::SequenceViewer(std::string pcd_path, bool flag_annot, std::strin
     viewer->setBackgroundColor(1.0, 1.0, 1.0);
     viewer->addPointCloud<PointT>(cloud, "sample cloud");
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
+    viewer->addCoordinateSystem();
 
-    BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "sample cube"};
-    showBBox3D(sample);
+    // BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "center"};
+    // showBBox3D(sample);
+
+    if (flag_annot)
+    {
+        std::string annot_file = annot_path + "00000000.json";
+        std::cout << "loading : " << annot_file << std::endl;
+
+        std::vector<BBox3D> bboxes;
+        bool ret = load_annot(annot_file, bboxes);
+
+        for (BBox3D bbox : bboxes) 
+        {
+            std::cout << "load-bbox : " << bbox.id << std::endl;
+            showBBox3D(bbox);
+        }
+    }
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
 }
@@ -114,10 +130,10 @@ void SequenceViewer::update_cloud(int pcd_id)
             this->viewer->updatePointCloud(this->cloud, "sample cloud");
             this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
 
-            // this->viewer->removeShape("sample cube");
-            this->viewer->removeAllShapes();
-            BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "sample cube"};
-            this->showBBox3D(sample);
+            // this->viewer->removeShape("center");
+            // this->viewer->removeAllShapes();
+            // BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "center"};
+            // this->showBBox3D(sample);
         }
     }
 }
