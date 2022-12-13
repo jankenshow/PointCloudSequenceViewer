@@ -47,11 +47,23 @@ We add extra KeyDownEvents below.
 
 # TODO
 
-- Display pcd_file name of currently shown point cloud on top-left of viewer window.  
-- Automatically and Intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
-- Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
-- Show these 3d bboxes/labels of currently shown point cloud.  
-- Update cmake so as to be able to build on ubuntu.  
+- [] Display pcd_file name of currently shown point cloud on top-left of viewer window.  
+- [] Automatically and intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
+    - As for now, intermittently switching functionality with left/right keydown.  
+- [] Keyboard callback to save screenshots (for all frames).  
+- [] save/load camera configuration  
+    - [x] save function  
+    - [] save path option  
+    - [] load function  
+    - [] load option  
+- [] Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
+    - [x] load single frame annotation file(3d bboxes/labels).  
+    - [x] Show these 3d bboxes/labels of currently shown point cloud.  
+    - [x] options to load annotation files
+    - [] switch annotation to next/back one, when frame changes.
+    - [] size, extent clipping for bbox.
+- [] Update cmake so as to be able to build on ubuntu.  
+- [] Optimizing build like -O3 option.
 
 <!-- # 気になるところ
 
