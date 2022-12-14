@@ -43,27 +43,39 @@ Baisically, manipulation of popuped window follows [usage of PCLVisualizer](http
 We add extra KeyDownEvents below.  
 - right-allow : switch currently shown point cloud to next one.
 - left-allow : switch currently shown point cloud to previous one.
+- c : save current camera pose
+- shift + click point : show coord of clicked point.
 
 
 # TODO
 
-- [] Display pcd_file name of currently shown point cloud on top-left of viewer window.  
+- [] Display general info  
+    - [] pcd_file name of currently shown point cloud on top-left of viewer window.  
 - [] Automatically and intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
-    - As for now, intermittently switching functionality with left/right keydown.  
-- [] Keyboard callback to save screenshots (for all frames).  
-- [] save/load camera configuration  
+    - [x] intermittently switching functionality with left/right keydown.  
+    - [] automatic frame proceeding  
+- [] mouse callback  
+    - [x] get coord of licked point.
+    - [] display coord of point clicked.  
+- [] Keyboard callback 
+    - [] save screenshots (for all frames).  
+- [x] save/load camera configuration  
     - [x] save function  
-    - [] save path option  
-    - [] load function  
-    - [] load option  
+    - [x] save path option  
+    - [x] load function  
+    - [x] load option  
 - [] Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
     - [x] load single frame annotation file(3d bboxes/labels).  
+    - [x] options to load annotation files  
     - [x] Show these 3d bboxes/labels of currently shown point cloud.  
-    - [x] options to load annotation files
-    - [] switch annotation to next/back one, when frame changes.
-    - [] size, extent clipping for bbox.
-- [] Update cmake so as to be able to build on ubuntu.  
-- [] Optimizing build like -O3 option.
+    - [] show bbox text label.  
+    - [] switch annotation to next/back one, when frame changes.  
+    - [] size, extent clipping for bbox.  
+    - [] debug
+- [] cmake file  
+    - [] Update cmake so as to be able to build on ubuntu.  
+    - [] Optimizing build like -O3 option.  
+- [] migration to Qt  
 
 <!-- # 気になるところ
 
