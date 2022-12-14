@@ -23,22 +23,23 @@ using PointCloudT = pcl::PointCloud<PointT>;
 class SequenceViewer
 {
 public:
+    std::string cameraparam_save_path;
     int pcd_len;
     int current_pcd_id;
 
-    SequenceViewer(std::string pcd_path, bool flag_annot, std::string annot_path);
+    SequenceViewer(std::string pcd_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path);
 
     void load_pcd_files(const std::string pcd_path);
     void load_point_cloud(const std::string pcd_file_path);
     void update_cloud(int pcd_id);
-    void save_pose();
+    void load_camerapose(std::string cameraparam_path);
+    void save_camerapose();
 
     void showBBox3D(BBox3D &sample);
 
     int run();
 
 protected:
-    bool flag_annot;
     std::string annot_path;
     std::vector<std::string> pcd_files;
     PointCloudT::Ptr cloud;

@@ -1,10 +1,12 @@
 #include "sequence_viewer.h"
 #include "pointcloud_processing.h"
 
-SequenceViewer::SequenceViewer(std::string pcd_path, bool flag_annot, std::string annot_path) : pcd_len(0),
-                                                       current_pcd_id(0),
-                                                       flag_annot(flag_annot),
-                                                       annot_path(annot_path)
+SequenceViewer::SequenceViewer(
+    std::string pcd_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path
+) : pcd_len(0),
+    current_pcd_id(0),
+    annot_path(annot_path),
+    cameraparam_save_path(cameraparam_save_path)
 {
     load_pcd_files(pcd_path);
 
@@ -15,10 +17,14 @@ SequenceViewer::SequenceViewer(std::string pcd_path, bool flag_annot, std::strin
     viewer.reset(new pcl::visualization::PCLVisualizer("3D Viewer"));
     viewer->setBackgroundColor(1.0, 1.0, 1.0);
     viewer->addPointCloud<PointT>(cloud, "sample cloud");
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 8, "sample cloud");
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "sample cloud");
     viewer->addCoordinateSystem();
+    if (!cameraparam_path.empty())
+    {
+        load_camerapose(cameraparam_path);
+    }
 
-    if (flag_annot)
+    if (!annot_path.empty())
     {
         std::string annot_file = annot_path + "00000000.json";
         std::cout << "loading : " << annot_file << std::endl;
@@ -131,7 +137,7 @@ void SequenceViewer::update_cloud(int pcd_id)
             apply_color(cloud_tmp);
             pcl::copyPointCloud(*cloud_tmp, *(this->cloud));
             this->viewer->updatePointCloud(this->cloud, "sample cloud");
-            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 8, "sample cloud");
+            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "sample cloud");
 
             // this->viewer->removeShape("center");
             this->viewer->removeAllShapes();
@@ -141,13 +147,19 @@ void SequenceViewer::update_cloud(int pcd_id)
     }
 }
 
-void SequenceViewer::save_pose()
+void SequenceViewer::save_camerapose()
 {
+    this->viewer->saveCameraParameters(this->cameraparam_save_path);
     // Eigen::Affine3f pose_mat;
-    this->viewer->saveCameraParameters ("temp.cam");
-    // pose_mat = this->viewer->getViewerPose ();
+    // this->viewer->saveCameraParameters("cameraparam.cam");
+    // pose_mat = this->viewer->getViewerPose();
     // std::cout << pose_mat.translation() << std::endl;
     // std::cout << pose_mat.rotation() << std::endl;
+}
+
+void SequenceViewer::load_camerapose(std::string cameraparam_path)
+{
+    this->viewer->loadCameraParameters(cameraparam_path);
 }
 
 void SequenceViewer::showBBox3D(BBox3D &bbox)
@@ -196,7 +208,7 @@ void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void 
     }
     else if (event.getKeySym() == "c" && event.keyDown ())
     {
-        seq_viewer->save_pose();
+        seq_viewer->save_camerapose();
     }
 }
 
