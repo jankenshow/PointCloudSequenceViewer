@@ -55,9 +55,10 @@ We add extra KeyDownEvents below.
     - [x] intermittently switching functionality with left/right keydown.  
     - [] automatic frame proceeding  
 - [] mouse callback  
-    - [x] get coord of licked point.
+    - [x] get coord of licked point.  
     - [] display coord of point clicked.  
-- [] Keyboard callback 
+    - [] debug  
+- [] Keyboard callback  
     - [] save screenshots (for all frames).  
 - [x] save/load camera configuration  
     - [x] save function  
@@ -71,7 +72,7 @@ We add extra KeyDownEvents below.
     - [] show bbox text label.  
     - [] switch annotation to next/back one, when frame changes.  
     - [] size, extent clipping for bbox.  
-    - [] debug
+    - [] debug  
 - [] cmake file  
     - [] Update cmake so as to be able to build on ubuntu.  
     - [] Optimizing build like -O3 option.  
