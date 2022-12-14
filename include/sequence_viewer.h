@@ -46,3 +46,4 @@ protected:
 };
 
 void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void *viewer_void);
+void pointPickingEventOccured(const pcl::visualization::PointPickingEvent& event, void *viewer_void);

@@ -15,11 +15,8 @@ SequenceViewer::SequenceViewer(std::string pcd_path, bool flag_annot, std::strin
     viewer.reset(new pcl::visualization::PCLVisualizer("3D Viewer"));
     viewer->setBackgroundColor(1.0, 1.0, 1.0);
     viewer->addPointCloud<PointT>(cloud, "sample cloud");
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 8, "sample cloud");
     viewer->addCoordinateSystem();
-
-    // BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "center"};
-    // showBBox3D(sample);
 
     if (flag_annot)
     {
@@ -31,12 +28,18 @@ SequenceViewer::SequenceViewer(std::string pcd_path, bool flag_annot, std::strin
 
         for (BBox3D bbox : bboxes) 
         {
+            // if (bbox.id.find("person") != std::string::npos)
+            // {
+            //     std::cout << "load-bbox : " << bbox.id << std::endl;
+            //     showBBox3D(bbox);
+            // }
             std::cout << "load-bbox : " << bbox.id << std::endl;
             showBBox3D(bbox);
         }
     }
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
+    viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
 }
 
 void SequenceViewer::load_pcd_files(const std::string pcd_path)
@@ -128,10 +131,10 @@ void SequenceViewer::update_cloud(int pcd_id)
             apply_color(cloud_tmp);
             pcl::copyPointCloud(*cloud_tmp, *(this->cloud));
             this->viewer->updatePointCloud(this->cloud, "sample cloud");
-            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
+            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 8, "sample cloud");
 
             // this->viewer->removeShape("center");
-            // this->viewer->removeAllShapes();
+            this->viewer->removeAllShapes();
             // BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "center"};
             // this->showBBox3D(sample);
         }
@@ -153,6 +156,12 @@ void SequenceViewer::showBBox3D(BBox3D &bbox)
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, bbox.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, bbox.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, bbox.id);
+
+    std::string s = bbox.id + "_text";
+    PointT trans(bbox.translation(0), bbox.translation(1), bbox.translation(2), 0, 0, 0);
+    Eigen::Vector3f text_euler = bbox.rotation.toRotationMatrix().eulerAngles(0, 1, 2);
+    double angle[3] = {(double)text_euler(0), (double)text_euler(1), (double)text_euler(2)};
+    this->viewer->addText3D<PointT>(bbox.id, trans, angle, 1.0, 1.0, 1.0, 1.0, s);
 }
 
 int SequenceViewer::run()
@@ -189,4 +198,14 @@ void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void 
     {
         seq_viewer->save_pose();
     }
+}
+
+void pointPickingEventOccured(const pcl::visualization::PointPickingEvent& event, void *viewer_void)
+{
+    SequenceViewer *seq_viewer = static_cast<SequenceViewer *>(viewer_void);
+
+    float x,y,z;
+    std::cout << event.getPointIndex() << std::endl;
+    event.getPoint(x,y,z);
+    std::cout << "("<<x<<","<<y<<","<<z<<")" << std::endl; 
 }
