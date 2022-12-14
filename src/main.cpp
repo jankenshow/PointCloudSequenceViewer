@@ -1,10 +1,13 @@
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 
 #include "sequence_viewer.h"
 
 int main(int argc, char *argv[])
 {
     namespace bops = boost::program_options;
+    namespace bfs = boost::filesystem;
 
     bops::options_description description("options");
     description.add_options()
@@ -14,7 +17,13 @@ int main(int argc, char *argv[])
         "path to pcd file or directory in which pcd files exist")
         ("annotation_path,",
         bops::value<std::string>(),
-        "path to directory in which annotation files exist");;
+        "path to directory in which annotation files exist")
+        ("cameraparam_path,",
+        bops::value<std::string>(),
+        "path to camera pose parameters of view point")
+        ("cameraparam_save_path,",
+        bops::value<std::string>(),
+        "where to save camera pose parameters of view point, default : [current_directory]/cameraparam.cam");
 
     bops::variables_map vm;
     try
@@ -54,19 +63,42 @@ int main(int argc, char *argv[])
     }
 
     std::string annot_path;
-    bool flag_annot;
     if (vm.count("annotation_path"))
     {
         annot_path = vm["annotation_path"].as<std::string>();
-        flag_annot = true;
-    }
-    else 
-    {
+    } else {
         annot_path = "";
-        flag_annot = false;
     }
 
-    SequenceViewer viewer(pcd_path, flag_annot, annot_path);
+    std::string cameraparam_path;
+    if (vm.count("cameraparam_path"))
+    {
+        cameraparam_path = vm["cameraparam_path"].as<std::string>();
+    } else {
+        cameraparam_path = "";
+    }
+
+    std::string cameraparam_save_path;
+    if (vm.count("cameraparam_save_path"))
+    {
+        cameraparam_save_path = vm["cameraparam_save_path"].as<std::string>();
+
+        bfs::path bfs_p(cameraparam_save_path);
+
+        if (cameraparam_save_path.empty() or !bfs::exists(bfs_p))
+        {
+            std::string message = (
+                boost::format("An argument 'cameraparam_save_path : %1%' is empty or doesn't exist!") % cameraparam_save_path).str();
+            throw std::runtime_error(message);
+        } else if (bfs::is_directory(bfs_p))
+        {
+            cameraparam_save_path = (bfs_p / "camerapose.cam").string();
+        }
+    } else {
+        cameraparam_save_path = "camerapose.cam";
+    }
+
+    SequenceViewer viewer(pcd_path, annot_path, cameraparam_path, cameraparam_save_path);
     int res;
     res = viewer.run();
     return res;
