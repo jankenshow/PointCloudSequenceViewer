@@ -20,6 +20,7 @@
 using PointT = pcl::PointXYZRGB;
 using PointCloudT = pcl::PointCloud<PointT>;
 
+
 class SequenceViewer
 {
 public:
