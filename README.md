@@ -41,9 +41,10 @@ $ brew install qt@5 boost pcl
 Baisically, manipulation of popuped window follows [usage of PCLVisualizer](https://pcl.readthedocs.io/projects/tutorials/en/master/pcl_visualizer.html#compiling-and-running-the-program).  
 
 We add extra KeyDownEvents below.  
-- right-allow : switch currently shown point cloud to next one.
-- left-allow : switch currently shown point cloud to previous one.
-- c : save current camera pose
+- right-allow : switch currently shown point cloud to next one.  
+- left-allow : switch currently shown point cloud to previous one.  
+- c : save current camera pose.  
+- i : save current window screenshot to [current_dir/screenshot_pcl_viewer.png].
 - shift + click point : show coord of clicked point.
 
 
@@ -59,7 +60,9 @@ We add extra KeyDownEvents below.
     - [] display coord of point clicked.  
     - [] debug  
 - [] Keyboard callback  
-    - [] save screenshots (for all frames).  
+    - [x] save screenshots  
+    = [] save screenshots to specified directory.
+    - [] automatically save screenshots for all frames.  
 - [x] save/load camera configuration  
     - [x] save function  
     - [x] save path option  

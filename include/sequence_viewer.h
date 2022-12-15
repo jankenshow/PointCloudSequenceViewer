@@ -34,8 +34,9 @@ public:
     void load_point_cloud(const std::string pcd_file_path);
     void load_annot_json(std::string pcd_file_path);
     void update_cloud(int pcd_id);
-    void load_camerapose(std::string cameraparam_path);
     void save_camerapose();
+    void load_camerapose(std::string cameraparam_path);
+    void save_screenshot();
 
     void showBBox3D(const BBox3D &bbox);
 

@@ -182,6 +182,7 @@ void SequenceViewer::load_annot_json(std::string pcd_file_path)
 void SequenceViewer::save_camerapose()
 {
     this->viewer->saveCameraParameters(this->cameraparam_save_path);
+    std::cout << "camera pose file was saved to " << this->cameraparam_save_path << std::endl;
     // Eigen::Affine3f pose_mat;
     // this->viewer->saveCameraParameters("cameraparam.cam");
     // pose_mat = this->viewer->getViewerPose();
@@ -192,6 +193,13 @@ void SequenceViewer::save_camerapose()
 void SequenceViewer::load_camerapose(std::string cameraparam_path)
 {
     this->viewer->loadCameraParameters(cameraparam_path);
+    std::cout << "camera pose file " << this->cameraparam_save_path << " was loaded." << std::endl;
+}
+
+void SequenceViewer::save_screenshot()
+{
+    this->viewer->saveScreenshot("screenshot_pcl_viewer.png");
+    std::cout << "camera pose file was saved to 'screenshot_pcl_viewer.png'" << std::endl;
 }
 
 void SequenceViewer::showBBox3D(const BBox3D &bbox)
@@ -238,9 +246,13 @@ void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void 
         new_pcd_id = (seq_viewer->current_pcd_id + seq_viewer->pcd_len - 1) % seq_viewer->pcd_len;
         seq_viewer->update_cloud(new_pcd_id);
     }
-    else if (event.getKeySym() == "c" && event.keyDown ())
+    else if (event.getKeySym() == "c" && event.keyDown())
     {
         seq_viewer->save_camerapose();
+    }
+    else if (event.getKeySym() == "i" && event.keyDown())
+    {
+        seq_viewer->save_screenshot();
     }
 }
 
