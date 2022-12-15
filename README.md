@@ -50,8 +50,8 @@ We add extra KeyDownEvents below.
 
 # TODO
 
-- [] Display general info  
-    - [] pcd_file name of currently shown point cloud on top-left of viewer window.  
+- [x] Display general info  
+    - [x] pcd_file name of currently shown point cloud on top-left of viewer window.  
 - [] Automatically and intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
     - [x] intermittently switching functionality with left/right keydown.  
     - [] automatic frame proceeding  

@@ -16,8 +16,8 @@ SequenceViewer::SequenceViewer(
 
     viewer.reset(new pcl::visualization::PCLVisualizer("3D Viewer"));
     viewer->setBackgroundColor(1.0, 1.0, 1.0);
-    viewer->addPointCloud<PointT>(cloud, "sample cloud");
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "sample cloud");
+    viewer->addPointCloud<PointT>(cloud, "cloud");
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
     viewer->addCoordinateSystem();
     if (!cameraparam_path.empty())
     {
@@ -25,6 +25,7 @@ SequenceViewer::SequenceViewer(
     }
 
     load_annot_json(pcd_files[current_pcd_id]);
+    viewer->addText(pcd_files[current_pcd_id], 0, 0, 0, 0, 0, "file_name");
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
     viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
@@ -118,12 +119,13 @@ void SequenceViewer::update_cloud(int pcd_id)
         {
             apply_color(cloud_tmp);
             pcl::copyPointCloud(*cloud_tmp, *(this->cloud));
-            this->viewer->updatePointCloud(this->cloud, "sample cloud");
-            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "sample cloud");
+            this->viewer->updatePointCloud(this->cloud, "cloud");
+            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
 
             // this->viewer->removeShape("center");
             this->viewer->removeAllShapes();
             this->load_annot_json(pcd_file);
+            this->viewer->addText(this->pcd_files[pcd_id], 0, 0, 0, 0, 0, "file_name");
         }
     }
 }
