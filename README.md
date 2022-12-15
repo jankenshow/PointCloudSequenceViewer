@@ -4,7 +4,7 @@ Viewer for multiple point cloud.
 
 # Environment
 
-- macOS Monterey (ver. 12.5)  
+- macOS > Monterey (ver. 12.5)  
 - Homebrew installed  
 
 
