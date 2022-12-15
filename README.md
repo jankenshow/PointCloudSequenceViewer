@@ -69,8 +69,8 @@ We add extra KeyDownEvents below.
     - [x] load single frame annotation file(3d bboxes/labels).  
     - [x] options to load annotation files  
     - [x] Show these 3d bboxes/labels of currently shown point cloud.  
-    - [] show bbox text label.  
-    - [] switch annotation to next/back one, when frame changes.  
+    - [x] show bbox text label.  
+    - [x] switch annotation to next/back one, when frame changes.  
     - [] size, extent clipping for bbox.  
     - [] debug  
 - [] cmake file  
