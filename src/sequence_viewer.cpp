@@ -24,23 +24,7 @@ SequenceViewer::SequenceViewer(
         load_camerapose(cameraparam_path);
     }
 
-    if (!annot_path.empty())
-    {
-        std::string annot_file = annot_path + "00000000.json";
-        std::cout << "loading : " << annot_file << std::endl;
-
-        std::vector<BBox3D> bboxes;
-        bool ret = load_annot(annot_file, bboxes);
-
-        for (BBox3D bbox : bboxes) 
-        {
-            std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
-            std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
-            std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
-            std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
-            showBBox3D(bbox);
-        }
-    }
+    load_annot_json(pcd_files[current_pcd_id]);
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
     viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
@@ -139,8 +123,58 @@ void SequenceViewer::update_cloud(int pcd_id)
 
             // this->viewer->removeShape("center");
             this->viewer->removeAllShapes();
-            // BBox3D sample{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, 1.0, 1.0, 1.0, "center"};
-            // this->showBBox3D(sample);
+            this->load_annot_json(pcd_file);
+        }
+    }
+}
+
+void SequenceViewer::load_annot_json(std::string pcd_file_path)
+{
+    namespace bfs = boost::filesystem;
+
+    std::string annot_p = this->annot_path;
+    bfs::path bfs_annot_p (annot_p);
+
+    this->bboxes.clear();
+
+    if (!bfs::exists(bfs_annot_p))
+    {
+        std::cout << (boost::format("Warning : annotaion path '%1%' does not exist.") % annot_p).str() << std::endl;
+    } else if (!annot_p.empty())
+    {
+        bool ret = false;
+
+        if (bfs::is_directory(bfs_annot_p)) 
+        {
+            std::string file_name = bfs::path(pcd_file_path).stem().string();
+            std::string annot_file =  (bfs_annot_p / (file_name + ".json")).string();
+            std::cout << "loading : " << annot_file << std::endl;
+
+            ret = load_annot(annot_file, this->bboxes);
+        } else if (bfs_annot_p.extension().string() == ".json")
+        {
+            ret = load_annot(annot_p, this->bboxes);
+        }
+
+        if (!ret)
+        {
+            std::cout << (boost::format("Warning : annotaion path '%1%' was skipped.") % annot_p).str() << std::endl;
+            std::cout << "check file format." << std::endl;
+        }
+
+        for (BBox3D bbox : this->bboxes) 
+        {
+            // if (bbox.id.find("person") != std::string::npos)
+            // {
+            //     std::cout << "load-bbox : " << bbox.id << std::endl;
+            //     showBBox3D(bbox);
+            // }
+            std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
+            std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
+            std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
+            std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
+            this->showBBox3D(bbox);
+            std::cout << "loaded" << std::endl;
         }
     }
 }
@@ -160,7 +194,7 @@ void SequenceViewer::load_camerapose(std::string cameraparam_path)
     this->viewer->loadCameraParameters(cameraparam_path);
 }
 
-void SequenceViewer::showBBox3D(BBox3D &bbox)
+void SequenceViewer::showBBox3D(const BBox3D &bbox)
 {
     this->viewer->addCube(bbox.translation, bbox.rotation, bbox.width, bbox.depth, bbox.height, bbox.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, bbox.id);
