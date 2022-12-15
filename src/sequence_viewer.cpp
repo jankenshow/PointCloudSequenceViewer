@@ -34,12 +34,10 @@ SequenceViewer::SequenceViewer(
 
         for (BBox3D bbox : bboxes) 
         {
-            // if (bbox.id.find("person") != std::string::npos)
-            // {
-            //     std::cout << "load-bbox : " << bbox.id << std::endl;
-            //     showBBox3D(bbox);
-            // }
-            std::cout << "load-bbox : " << bbox.id << std::endl;
+            std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
+            std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
+            std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
+            std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
             showBBox3D(bbox);
         }
     }
@@ -164,7 +162,7 @@ void SequenceViewer::load_camerapose(std::string cameraparam_path)
 
 void SequenceViewer::showBBox3D(BBox3D &bbox)
 {
-    this->viewer->addCube(bbox.translation, bbox.rotation, bbox.width, bbox.height, bbox.depth, bbox.id);
+    this->viewer->addCube(bbox.translation, bbox.rotation, bbox.width, bbox.depth, bbox.height, bbox.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, bbox.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, bbox.id);
     this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, bbox.id);

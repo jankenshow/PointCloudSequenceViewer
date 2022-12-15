@@ -41,19 +41,26 @@ inline bool load_annot(std::string annot_file, std::vector<BBox3D> &bboxes)
         BOOST_FOREACH (const bpt::ptree::value_type& child, pt.get_child("BoundingBox3D")) 
         {
             const bpt::ptree& info = child.second;
+
             Eigen::Vector3f bbox_center(
                 info.get<float>("Origin.x"), info.get<float>("Origin.y"), info.get<float>("Origin.z")
             );
+            Eigen::Vector3f bbox_center_lidar_coord = lidar_0_quat.inverse() * (bbox_center - lidar_0_trans);
+            // Eigen::Quaternionf p;
+            // p.w() = 0;
+            // p.vec() = (bbox_center - lidar_0_trans);
+            // Eigen::Quaternionf rotatedP = lidar_0_quat.inverse() * p * lidar_0_quat; 
+            // Eigen::Vector3f bbox_center_lidar_coord = rotatedP.vec();
+
             Eigen::Quaternionf bbox_rot(
                 info.get<float>("Rotation.w"), info.get<float>("Rotation.x"), info.get<float>("Rotation.y"), info.get<float>("Rotation.z")
             );
-            Eigen::Vector3f bbox_center_lidar_coord = lidar_0_quat.inverse() * (bbox_center - lidar_0_trans);
             Eigen::Quaternionf bbox_rot_lidar_coord = lidar_0_quat.inverse() * bbox_rot;
 
             float width, height, depth;
             width = info.get<float>("Extent.x");
-            height = info.get<float>("Extent.y");
-            depth = info.get<float>("Extent.z");
+            height = info.get<float>("Extent.z");
+            depth = info.get<float>("Extent.y");
 
             std::string id = info.get<std::string>("Label") + "_";
             id += std::to_string(count);
