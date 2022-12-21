@@ -1,5 +1,6 @@
 #include "pointcloud_processing.h"
 
+
 void apply_color(PointCloudT::Ptr cloud)
 {
     int filtering_axis_(2);

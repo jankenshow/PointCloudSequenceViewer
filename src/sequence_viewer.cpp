@@ -1,8 +1,12 @@
 #include "sequence_viewer.h"
 #include "pointcloud_processing.h"
 
-SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
-                                                       current_pcd_id(0)
+SequenceViewer::SequenceViewer(
+    std::string pcd_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path
+) : pcd_len(0),
+    current_pcd_id(0),
+    annot_path(annot_path),
+    cameraparam_save_path(cameraparam_save_path)
 {
     load_pcd_files(pcd_path);
 
@@ -12,12 +16,19 @@ SequenceViewer::SequenceViewer(std::string pcd_path) : pcd_len(0),
 
     viewer.reset(new pcl::visualization::PCLVisualizer("3D Viewer"));
     viewer->setBackgroundColor(1.0, 1.0, 1.0);
-    viewer->addPointCloud<PointT>(cloud, "sample cloud");
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
+    viewer->addPointCloud<PointT>(cloud, "cloud");
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
+    viewer->addCoordinateSystem();
+    if (!cameraparam_path.empty())
+    {
+        load_camerapose(cameraparam_path);
+    }
 
-    // showBBox3D();
+    load_annot_json(pcd_files[current_pcd_id]);
+    viewer->addText(pcd_files[current_pcd_id], 0, 0, 0, 0, 0, "file_name");
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
+    viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
 }
 
 void SequenceViewer::load_pcd_files(const std::string pcd_path)
@@ -30,7 +41,6 @@ void SequenceViewer::load_pcd_files(const std::string pcd_path)
 
     if (pcd_path.empty() or !bfs::exists(bfs_p))
     {
-        // bfs::filesystem_error file_error (
         std::string message = (boost::format("An argument 'pcd_path : %1%' is empty or doesn't exist!") % pcd_path).str();
         throw std::runtime_error(message);
     }
@@ -109,26 +119,108 @@ void SequenceViewer::update_cloud(int pcd_id)
         {
             apply_color(cloud_tmp);
             pcl::copyPointCloud(*cloud_tmp, *(this->cloud));
-            this->viewer->updatePointCloud(this->cloud, "sample cloud");
-            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "sample cloud");
+            this->viewer->updatePointCloud(this->cloud, "cloud");
+            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
 
-            // this->viewer->removeShape("sample cube");
-            // this->showBBox3D();
+            // this->viewer->removeShape("center");
+            this->viewer->removeAllShapes();
+            this->load_annot_json(pcd_file);
+            this->viewer->addText(this->pcd_files[pcd_id], 0, 0, 0, 0, 0, "file_name");
         }
     }
 }
 
-void SequenceViewer::showBBox3D()
+void SequenceViewer::load_annot_json(std::string pcd_file_path)
 {
-    Eigen::Vector3f translation{{0.0, 0.0, 0.0}};
-    Eigen::Quaternionf rotation{0.0, 0.0, 0.0, 1.0};
-    double width = 1.0;
-    double height = 1.0;
-    double depth = 1.0;
-    this->viewer->addCube(translation, rotation, width, height, depth, "sample cube");
-    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sample cube");
-    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, "sample cube");
-    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "sample cube");
+    namespace bfs = boost::filesystem;
+
+    std::string annot_p = this->annot_path;
+    bfs::path bfs_annot_p (annot_p);
+
+    this->bboxes.clear();
+
+    if (!annot_p.empty())
+    {
+        if (!bfs::exists(bfs_annot_p))
+        {
+            std::cout << (boost::format("Warning : annotaion path '%1%' does not exist.") % annot_p).str() << std::endl;
+        }
+        else 
+        {
+            bool ret = false;
+
+            if (bfs::is_directory(bfs_annot_p)) 
+            {
+                std::string file_name = bfs::path(pcd_file_path).stem().string();
+                std::string annot_file =  (bfs_annot_p / (file_name + ".json")).string();
+                std::cout << "loading : " << annot_file << std::endl;
+
+                ret = load_annot(annot_file, this->bboxes);
+            } 
+            else if (bfs_annot_p.extension().string() == ".json")
+            {
+                ret = load_annot(annot_p, this->bboxes);
+            }
+
+            if (!ret)
+            {
+                std::cout << (boost::format("Warning : annotaion path '%1%' was skipped.") % annot_p).str() << std::endl;
+                std::cout << "check file format." << std::endl;
+            }
+
+            for (BBox3D bbox : this->bboxes) 
+            {
+                // if (bbox.id.find("person") != std::string::npos)
+                // {
+                //     std::cout << "load-bbox : " << bbox.id << std::endl;
+                //     showBBox3D(bbox);
+                // }
+                std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
+                std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
+                std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
+                std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
+                this->showBBox3D(bbox);
+                std::cout << "loaded" << std::endl;
+            }
+        }
+    }
+}
+
+void SequenceViewer::save_camerapose()
+{
+    this->viewer->saveCameraParameters(this->cameraparam_save_path);
+    std::cout << "camera pose file was saved to " << this->cameraparam_save_path << std::endl;
+    // Eigen::Affine3f pose_mat;
+    // this->viewer->saveCameraParameters("cameraparam.cam");
+    // pose_mat = this->viewer->getViewerPose();
+    // std::cout << pose_mat.translation() << std::endl;
+    // std::cout << pose_mat.rotation() << std::endl;
+}
+
+void SequenceViewer::load_camerapose(std::string cameraparam_path)
+{
+    this->viewer->loadCameraParameters(cameraparam_path);
+    std::cout << "camera pose file " << this->cameraparam_save_path << " was loaded." << std::endl;
+}
+
+void SequenceViewer::save_screenshot()
+{
+    this->viewer->saveScreenshot("screenshot_pcl_viewer.png");
+    std::cout << "camera pose file was saved to 'screenshot_pcl_viewer.png'" << std::endl;
+}
+
+void SequenceViewer::showBBox3D(const BBox3D &bbox)
+{
+    this->viewer->addCube(bbox.translation, bbox.rotation, bbox.width, bbox.depth, bbox.height, bbox.id);
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, bbox.id);
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 0.0, 0.0, bbox.id);
+    this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, bbox.id);
+
+    std::string s = bbox.id + "_text";
+    PointT trans(bbox.translation(0), bbox.translation(1), bbox.translation(2), 0, 0, 0);
+    Eigen::Vector3f text_euler = bbox.rotation.toRotationMatrix().eulerAngles(0, 1, 2);
+    double angle[3] = {(double)text_euler(0), (double)text_euler(1), (double)text_euler(2)};
+    this->viewer->addText3D<PointT>(bbox.id, trans, angle, 1.0, 1.0, 1.0, 1.0, s);
 }
 
 int SequenceViewer::run()
@@ -161,4 +253,22 @@ void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void 
         new_pcd_id = (seq_viewer->current_pcd_id + seq_viewer->pcd_len - 1) % seq_viewer->pcd_len;
         seq_viewer->update_cloud(new_pcd_id);
     }
+    else if (event.getKeySym() == "c" && event.keyDown())
+    {
+        seq_viewer->save_camerapose();
+    }
+    else if (event.getKeySym() == "i" && event.keyDown())
+    {
+        seq_viewer->save_screenshot();
+    }
+}
+
+void pointPickingEventOccured(const pcl::visualization::PointPickingEvent& event, void *viewer_void)
+{
+    SequenceViewer *seq_viewer = static_cast<SequenceViewer *>(viewer_void);
+
+    float x,y,z;
+    std::cout << event.getPointIndex() << std::endl;
+    event.getPoint(x,y,z);
+    std::cout << "("<<x<<","<<y<<","<<z<<")" << std::endl; 
 }

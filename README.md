@@ -4,7 +4,7 @@ Viewer for multiple point cloud.
 
 # Environment
 
-- macOS Monterey (ver. 12.5)  
+- macOS > Monterey (ver. 12.5)  
 - Homebrew installed  
 
 
@@ -41,17 +41,45 @@ $ brew install qt@5 boost pcl
 Baisically, manipulation of popuped window follows [usage of PCLVisualizer](https://pcl.readthedocs.io/projects/tutorials/en/master/pcl_visualizer.html#compiling-and-running-the-program).  
 
 We add extra KeyDownEvents below.  
-- right-allow : switch currently shown point cloud to next one.
-- left-allow : switch currently shown point cloud to previous one.
+- right-allow : switch currently shown point cloud to next one.  
+- left-allow : switch currently shown point cloud to previous one.  
+- c : save current camera pose.  
+- i : save current window screenshot to [current_dir/screenshot_pcl_viewer.png].
+- shift + click point : show coord of clicked point.
 
 
 # TODO
 
-- Display pcd_file name of currently shown point cloud on top-left of viewer window.  
-- Automatically and Intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
-- Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
-- Show these 3d bboxes/labels of currently shown point cloud.  
-- Update cmake so as to be able to build on ubuntu.  
+- [x] Display general info  
+    - [x] pcd_file name of currently shown point cloud on top-left of viewer window.  
+- [] Automatically and intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
+    - [x] intermittently switching functionality with left/right keydown.  
+    - [] automatic frame proceeding  
+- [] mouse callback  
+    - [x] get coord of licked point.  
+    - [] display coord of point clicked.  
+    - [] debug  
+- [] Keyboard callback  
+    - [x] save screenshots  
+    = [] save screenshots to specified directory.
+    - [] automatically save screenshots for all frames.  
+- [x] save/load camera configuration  
+    - [x] save function  
+    - [x] save path option  
+    - [x] load function  
+    - [x] load option  
+- [] Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
+    - [x] load single frame annotation file(3d bboxes/labels).  
+    - [x] options to load annotation files  
+    - [x] Show these 3d bboxes/labels of currently shown point cloud.  
+    - [x] show bbox text label.  
+    - [x] switch annotation to next/back one, when frame changes.  
+    - [] size, extent clipping for bbox.  
+    - [] debug  
+- [] cmake file  
+    - [] Update cmake so as to be able to build on ubuntu.  
+    - [] Optimizing build like -O3 option.  
+- [] migration to Qt  
 
 <!-- # 気になるところ
 
