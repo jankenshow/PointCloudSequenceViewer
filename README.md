@@ -51,35 +51,36 @@ We add extra KeyDownEvents below.
 # TODO
 
 - [x] Display general info  
-    - [x] pcd_file name of currently shown point cloud on top-left of viewer window.  
-- [] Automatically and intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
+    - [x] pcd_file name of currently shown point cloud on top-left of viewer window.    
+- [ ] Automatically and intermittently switches the displayed point cloud to next one, which can be configured by args/keydown-on-window.  
     - [x] intermittently switching functionality with left/right keydown.  
-    - [] automatic frame proceeding  
-- [] mouse callback  
+    - [ ] automatic frame proceeding  
+- [ ] FPS setting  
+- [ ] mouse callback  
     - [x] get coord of licked point.  
-    - [] display coord of point clicked.  
-    - [] debug  
-- [] Keyboard callback  
+    - [ ] display coord of point clicked.  
+    - [ ] debug  
+- [ ] Keyboard callback  
     - [x] save screenshots  
-    = [] save screenshots to specified directory.
-    - [] automatically save screenshots for all frames.  
+    - [ ] save screenshots to specified directory.
+    - [ ] automatically save screenshots for all frames.  
 - [x] save/load camera configuration  
     - [x] save function  
     - [x] save path option  
     - [x] load function  
     - [x] load option  
-- [] Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
+- [ ] Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
     - [x] load single frame annotation file(3d bboxes/labels).  
     - [x] options to load annotation files  
     - [x] Show these 3d bboxes/labels of currently shown point cloud.  
     - [x] show bbox text label.  
     - [x] switch annotation to next/back one, when frame changes.  
-    - [] size, extent clipping for bbox.  
-    - [] debug  
-- [] cmake file  
-    - [] Update cmake so as to be able to build on ubuntu.  
-    - [] Optimizing build like -O3 option.  
-- [] migration to Qt  
+    - [ ] size, extent clipping for bbox.  
+    - [ ] debug  
+- [ ] cmake file  
+    - [ ] Update cmake so as to be able to build on ubuntu.  
+    - [ ] Optimizing build like -O3 option.  
+- [ ] migration to Qt  
 
 <!-- # 気になるところ
 
