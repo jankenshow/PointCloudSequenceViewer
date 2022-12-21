@@ -139,44 +139,49 @@ void SequenceViewer::load_annot_json(std::string pcd_file_path)
 
     this->bboxes.clear();
 
-    if (!bfs::exists(bfs_annot_p))
+    if (!annot_p.empty())
     {
-        std::cout << (boost::format("Warning : annotaion path '%1%' does not exist.") % annot_p).str() << std::endl;
-    } else if (!annot_p.empty())
-    {
-        bool ret = false;
-
-        if (bfs::is_directory(bfs_annot_p)) 
+        if (!bfs::exists(bfs_annot_p))
         {
-            std::string file_name = bfs::path(pcd_file_path).stem().string();
-            std::string annot_file =  (bfs_annot_p / (file_name + ".json")).string();
-            std::cout << "loading : " << annot_file << std::endl;
-
-            ret = load_annot(annot_file, this->bboxes);
-        } else if (bfs_annot_p.extension().string() == ".json")
-        {
-            ret = load_annot(annot_p, this->bboxes);
+            std::cout << (boost::format("Warning : annotaion path '%1%' does not exist.") % annot_p).str() << std::endl;
         }
-
-        if (!ret)
+        else 
         {
-            std::cout << (boost::format("Warning : annotaion path '%1%' was skipped.") % annot_p).str() << std::endl;
-            std::cout << "check file format." << std::endl;
-        }
+            bool ret = false;
 
-        for (BBox3D bbox : this->bboxes) 
-        {
-            // if (bbox.id.find("person") != std::string::npos)
-            // {
-            //     std::cout << "load-bbox : " << bbox.id << std::endl;
-            //     showBBox3D(bbox);
-            // }
-            std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
-            std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
-            std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
-            std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
-            this->showBBox3D(bbox);
-            std::cout << "loaded" << std::endl;
+            if (bfs::is_directory(bfs_annot_p)) 
+            {
+                std::string file_name = bfs::path(pcd_file_path).stem().string();
+                std::string annot_file =  (bfs_annot_p / (file_name + ".json")).string();
+                std::cout << "loading : " << annot_file << std::endl;
+
+                ret = load_annot(annot_file, this->bboxes);
+            } 
+            else if (bfs_annot_p.extension().string() == ".json")
+            {
+                ret = load_annot(annot_p, this->bboxes);
+            }
+
+            if (!ret)
+            {
+                std::cout << (boost::format("Warning : annotaion path '%1%' was skipped.") % annot_p).str() << std::endl;
+                std::cout << "check file format." << std::endl;
+            }
+
+            for (BBox3D bbox : this->bboxes) 
+            {
+                // if (bbox.id.find("person") != std::string::npos)
+                // {
+                //     std::cout << "load-bbox : " << bbox.id << std::endl;
+                //     showBBox3D(bbox);
+                // }
+                std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
+                std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
+                std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
+                std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
+                this->showBBox3D(bbox);
+                std::cout << "loaded" << std::endl;
+            }
         }
     }
 }

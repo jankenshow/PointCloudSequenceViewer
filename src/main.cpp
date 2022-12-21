@@ -68,7 +68,9 @@ int main(int argc, char *argv[])
     if (vm.count("annotation_path"))
     {
         annot_path = vm["annotation_path"].as<std::string>();
-    } else {
+    } 
+    else
+    {
         annot_path = "";
     }
 
@@ -76,7 +78,9 @@ int main(int argc, char *argv[])
     if (vm.count("cameraparam_path"))
     {
         cameraparam_path = vm["cameraparam_path"].as<std::string>();
-    } else {
+    }
+    else
+    {
         cameraparam_path = "";
     }
 
@@ -92,11 +96,14 @@ int main(int argc, char *argv[])
             std::string message = (
                 boost::format("An argument 'cameraparam_save_path : %1%' is empty or doesn't exist!") % cameraparam_save_path).str();
             throw std::runtime_error(message);
-        } else if (bfs::is_directory(bfs_p))
+        }
+        else if (bfs::is_directory(bfs_p))
         {
             cameraparam_save_path = (bfs_p / "camerapose.cam").string();
         }
-    } else {
+    } 
+    else
+    {
         cameraparam_save_path = "camerapose.cam";
     }
 
