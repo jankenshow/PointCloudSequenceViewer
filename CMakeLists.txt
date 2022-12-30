@@ -28,6 +28,8 @@ if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     # endif()
 endif()
 
+find_package(VTK REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(PCL 1.2 REQUIRED)
 # find_package(PCL)
 
@@ -39,10 +41,12 @@ elseif(NOT Boost_FOUND)
 message(FATAL_ERROR "Unable to find correct Boost version. Did you set BOOST_ROOT?") 
 endif()
 
+include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 include_directories(include)
 add_executable (cloud_viewer ${cloud_viewer_src})
-target_link_libraries (cloud_viewer ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries (cloud_viewer ${VTK_LIBRARIES} ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+# target_link_libraries (cloud_viewer ${PCL_LIBRARIES} ${Boost_LIBRARIES})
