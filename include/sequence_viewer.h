@@ -14,6 +14,8 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/image_viewer.h>
+#include <opencv2/opencv.hpp>
 
 #include "bbox3d.h"
 
@@ -48,6 +50,7 @@ protected:
     PointCloudT::Ptr cloud;
     std::vector<BBox3D> bboxes;
     pcl::visualization::PCLVisualizer::Ptr viewer;
+    pcl::visualization::ImageViewer::Ptr img_viewer;
 };
 
 void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void *viewer_void);
