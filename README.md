@@ -59,7 +59,6 @@ We add extra KeyDownEvents below.
 - [ ] mouse callback  
     - [x] get coord of licked point.  
     - [ ] display coord of point clicked.  
-    - [ ] debug  
 - [ ] Keyboard callback  
     - [x] save screenshots  
     - [ ] save screenshots to specified directory.
@@ -69,6 +68,11 @@ We add extra KeyDownEvents below.
     - [x] save path option  
     - [x] load function  
     - [x] load option  
+- [ ] image viewer  
+    - [ ] option  
+    - [ ] viewer sample  
+    - [ ] toggle images related to pcd (register callback)  
+    - [ ] bbox2d  
 - [ ] Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
     - [x] load single frame annotation file(3d bboxes/labels).  
     - [x] options to load annotation files  
@@ -76,7 +80,6 @@ We add extra KeyDownEvents below.
     - [x] show bbox text label.  
     - [x] switch annotation to next/back one, when frame changes.  
     - [ ] size, extent clipping for bbox.  
-    - [ ] debug  
 - [ ] cmake file  
     - [ ] Update cmake so as to be able to build on ubuntu.  
     - [ ] Optimizing build like -O3 option.  
