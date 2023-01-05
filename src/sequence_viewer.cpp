@@ -30,7 +30,7 @@ SequenceViewer::SequenceViewer(
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
     viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
 
-    cv::Mat image = cv::imread("/Users/rist128/workspace/rist/autoware/src/pcl_viewer/cv2_test/resource/fruits.jpg");
+    cv::Mat image = cv::imread("");
     unsigned width = image.cols;
     unsigned height = image.rows;
     // int channels = image.channels();
@@ -38,14 +38,19 @@ SequenceViewer::SequenceViewer(
     unsigned char data[width * height * channels];
     for (int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
-            int addr_id = (h + 1) * w * 3;
+            // int addr_id = (h + 1) * w * 3;
             cv::Vec3b intensity = image.at<cv::Vec3b>(h, w);
-            uchar blue  = intensity.val[0];
-            uchar green = intensity.val[1];
-            uchar red   = intensity.val[2];
-            data[addr_id] = red;
-            data[addr_id + 1] = green;
-            data[addr_id + 2] = blue;
+            // uchar blue  = intensity.val[0];
+            // uchar green = intensity.val[1];
+            // uchar red   = intensity.val[2];
+            // data[addr_id] = red;
+            // data[addr_id + 1] = green;
+            // data[addr_id + 2] = blue;
+            for (int c = 0; c < 3; c++) {
+                int addr_id = h * width * 3 + w * 3 + c;
+                uchar pixel_color   = intensity.val[2 - c];
+                data[addr_id] = pixel_color;
+            }
         }
     }
     
