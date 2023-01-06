@@ -8,17 +8,22 @@ SequenceViewer::SequenceViewer(
     annot_path(annot_path),
     cameraparam_save_path(cameraparam_save_path)
 {
-    load_pcd_files(pcd_path);
-
     cloud.reset(new PointCloudT);
-    load_point_cloud(pcd_files[current_pcd_id]);
-    apply_color(cloud);
-
     viewer.reset(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    if (false) {
+        img_viewer.reset(new pcl::visualization::ImageViewer("Image Viewer"));
+    }
+
+    load_files(pcd_path, ".pcd");
+
+    load_point_cloud(pcd_files[current_pcd_id], cloud);
+    apply_color(cloud);
     viewer->setBackgroundColor(1.0, 1.0, 1.0);
     viewer->addPointCloud<PointT>(cloud, "cloud");
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
+
     viewer->addCoordinateSystem();
+
     if (!cameraparam_path.empty())
     {
         load_camerapose(cameraparam_path);
@@ -29,8 +34,110 @@ SequenceViewer::SequenceViewer(
 
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
     viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
+}
 
-    cv::Mat image = cv::imread("");
+void SequenceViewer::load_files(const std::string file_path, std::string target_ext)
+{
+    namespace bfs = boost::filesystem;
+
+    int file_check;
+    std::string file_ext;
+    bfs::path bfs_p(file_path);
+
+    if (file_path.empty() or !bfs::exists(bfs_p))
+    {
+        std::string message = (boost::format("An argument '%1%' is empty or doesn't exist!") % file_path).str();
+        throw std::runtime_error(message);
+    }
+
+    if (bfs::is_directory(bfs_p))
+    {
+        std::string pcd_file;
+        bfs::directory_iterator end_itr;
+
+        for (bfs::directory_iterator itr(bfs_p); itr != end_itr; ++itr)
+        {
+            if (bfs::is_regular_file(itr->path()))
+            {
+                pcd_file = itr->path().string();
+                file_ext = bfs::extension(pcd_file);
+                file_check = (file_ext == target_ext);
+                if (file_check)
+                {
+                    std::cout << pcd_file << " is detected." << std::endl;
+                    this->pcd_files.push_back(pcd_file);
+                }
+            }
+        }
+        std::sort(this->pcd_files.begin(), this->pcd_files.end());
+    }
+    else
+    {
+        file_ext = bfs::extension(file_path);
+        file_check = (file_ext == target_ext);
+        if (file_check)
+        {
+            std::cout << file_path << " is detected." << std::endl;
+            this->pcd_files.push_back(file_path);
+        }
+    }
+
+    this->pcd_len = this->pcd_files.size();
+}
+
+int SequenceViewer::load_point_cloud(const std::string pcd_file_path, PointCloudT::Ptr pcd_ptr)
+{
+    int load_status = pcl::io::loadPCDFile(pcd_file_path, *pcd_ptr);
+    if (load_status != 0)
+    {
+        std::string message = (boost::format("Error : cannot load point cloud %1%") % pcd_file_path).str();
+        throw std::runtime_error(message);
+    }
+    return load_status;
+}
+
+void SequenceViewer::update_cloud(int pcd_id)
+{
+    if (this->pcd_len == 1)
+    {
+        std::cout << "The number of loaded .pcd files is 1. The cloud shown in viewer would not change." << std::endl;
+    }
+    else
+    {
+        if (pcd_id >= this->pcd_len)
+        {
+            pcd_id = pcd_id % this->pcd_len;
+        }
+
+        this->current_pcd_id = pcd_id;
+        std::string pcd_file = this->pcd_files[pcd_id];
+        std::cout << "toggle cloud shown to : " << pcd_file << std::endl;
+
+        PointCloudT::Ptr cloud_tmp(new PointCloudT);
+        int load_status = load_point_cloud(pcd_file, cloud_tmp);
+
+        if (load_status != 0)
+        {
+            std::cerr << "Error : cannot load point cloud " << pcd_file << std::endl;
+        }
+        else
+        {
+            apply_color(cloud_tmp);
+            pcl::copyPointCloud(*cloud_tmp, *(this->cloud));
+            this->viewer->updatePointCloud(this->cloud, "cloud");
+            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
+
+            // this->viewer->removeShape("center");
+            this->viewer->removeAllShapes();
+            this->load_annot_json(pcd_file);
+            this->viewer->addText(this->pcd_files[pcd_id], 0, 0, 0, 0, 0, "file_name");
+        }
+    }
+}
+
+void SequenceViewer::update_image(int pcd_id) {
+    std::string image_path = "";
+    cv::Mat image = cv::imread(image_path);
     unsigned width = image.cols;
     unsigned height = image.rows;
     // int channels = image.channels();
@@ -53,108 +160,9 @@ SequenceViewer::SequenceViewer(
             }
         }
     }
-    
-    img_viewer.reset(new pcl::visualization::ImageViewer("Image Viewer"));
+
+    img_viewer->removeLayer("rgb_image");
     img_viewer->showRGBImage(data, width, height, "rgb_image", 1.0);
-}
-
-void SequenceViewer::load_pcd_files(const std::string pcd_path)
-{
-    namespace bfs = boost::filesystem;
-
-    int file_check;
-    std::string file_ext;
-    bfs::path bfs_p(pcd_path);
-
-    if (pcd_path.empty() or !bfs::exists(bfs_p))
-    {
-        std::string message = (boost::format("An argument 'pcd_path : %1%' is empty or doesn't exist!") % pcd_path).str();
-        throw std::runtime_error(message);
-    }
-
-    if (bfs::is_directory(bfs_p))
-    {
-        std::string pcd_file;
-        bfs::directory_iterator end_itr;
-
-        for (bfs::directory_iterator itr(bfs_p); itr != end_itr; ++itr)
-        {
-            if (bfs::is_regular_file(itr->path()))
-            {
-                pcd_file = itr->path().string();
-                file_ext = bfs::extension(pcd_file);
-                file_check = (file_ext == ".pcd");
-                if (file_check)
-                {
-                    std::cout << pcd_file << " is detected." << std::endl;
-                    this->pcd_files.push_back(pcd_file);
-                }
-            }
-        }
-        std::sort(this->pcd_files.begin(), this->pcd_files.end());
-    }
-    else
-    {
-        file_ext = bfs::extension(pcd_path);
-        file_check = (file_ext == ".pcd");
-        if (file_check)
-        {
-            std::cout << pcd_path << " is detected." << std::endl;
-            this->pcd_files.push_back(pcd_path);
-        }
-    }
-
-    this->pcd_len = this->pcd_files.size();
-}
-
-void SequenceViewer::load_point_cloud(const std::string pcd_file_path)
-{
-    int load_status = pcl::io::loadPCDFile(pcd_file_path, *(this->cloud));
-    if (load_status != 0)
-    {
-        std::string message = (boost::format("Error : cannot load point cloud %1%") % pcd_file_path).str();
-        throw std::runtime_error(message);
-    }
-}
-
-void SequenceViewer::update_cloud(int pcd_id)
-{
-    if (this->pcd_len == 1)
-    {
-        std::cout << "The number of loaded .pcd files is 1. The cloud shown in viewer would not change." << std::endl;
-    }
-    else
-    {
-        if (pcd_id >= this->pcd_len)
-        {
-            pcd_id = pcd_id % this->pcd_len;
-        }
-
-        this->current_pcd_id = pcd_id;
-        std::string pcd_file = this->pcd_files[pcd_id];
-        std::cout << "toggle cloud shown to : " << pcd_file << std::endl;
-
-        int load_status(0);
-        PointCloudT::Ptr cloud_tmp(new PointCloudT);
-        load_status = pcl::io::loadPCDFile(pcd_file, *cloud_tmp);
-
-        if (load_status != 0)
-        {
-            std::cerr << "Error : cannot load point cloud " << pcd_file << std::endl;
-        }
-        else
-        {
-            apply_color(cloud_tmp);
-            pcl::copyPointCloud(*cloud_tmp, *(this->cloud));
-            this->viewer->updatePointCloud(this->cloud, "cloud");
-            this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
-
-            // this->viewer->removeShape("center");
-            this->viewer->removeAllShapes();
-            this->load_annot_json(pcd_file);
-            this->viewer->addText(this->pcd_files[pcd_id], 0, 0, 0, 0, 0, "file_name");
-        }
-    }
 }
 
 void SequenceViewer::load_annot_json(std::string pcd_file_path)
@@ -213,29 +221,6 @@ void SequenceViewer::load_annot_json(std::string pcd_file_path)
     }
 }
 
-void SequenceViewer::save_camerapose()
-{
-    this->viewer->saveCameraParameters(this->cameraparam_save_path);
-    std::cout << "camera pose file was saved to " << this->cameraparam_save_path << std::endl;
-    // Eigen::Affine3f pose_mat;
-    // this->viewer->saveCameraParameters("cameraparam.cam");
-    // pose_mat = this->viewer->getViewerPose();
-    // std::cout << pose_mat.translation() << std::endl;
-    // std::cout << pose_mat.rotation() << std::endl;
-}
-
-void SequenceViewer::load_camerapose(std::string cameraparam_path)
-{
-    this->viewer->loadCameraParameters(cameraparam_path);
-    std::cout << "camera pose file " << this->cameraparam_save_path << " was loaded." << std::endl;
-}
-
-void SequenceViewer::save_screenshot()
-{
-    this->viewer->saveScreenshot("screenshot_pcl_viewer.png");
-    std::cout << "camera pose file was saved to 'screenshot_pcl_viewer.png'" << std::endl;
-}
-
 void SequenceViewer::showBBox3D(const BBox3D &bbox)
 {
     this->viewer->addCube(bbox.translation, bbox.rotation, bbox.width, bbox.depth, bbox.height, bbox.id);
@@ -250,6 +235,29 @@ void SequenceViewer::showBBox3D(const BBox3D &bbox)
     this->viewer->addText3D<PointT>(bbox.id, trans, angle, 1.0, 1.0, 1.0, 1.0, s);
 }
 
+void SequenceViewer::load_camerapose(std::string cameraparam_path)
+{
+    this->viewer->loadCameraParameters(cameraparam_path);
+    std::cout << "camera pose file " << this->cameraparam_save_path << " was loaded." << std::endl;
+}
+
+void SequenceViewer::save_camerapose()
+{
+    this->viewer->saveCameraParameters(this->cameraparam_save_path);
+    std::cout << "camera pose file was saved to " << this->cameraparam_save_path << std::endl;
+    // Eigen::Affine3f pose_mat;
+    // this->viewer->saveCameraParameters("cameraparam.cam");
+    // pose_mat = this->viewer->getViewerPose();
+    // std::cout << pose_mat.translation() << std::endl;
+    // std::cout << pose_mat.rotation() << std::endl;
+}
+
+void SequenceViewer::save_screenshot()
+{
+    this->viewer->saveScreenshot("screenshot_pcl_viewer.png");
+    std::cout << "camera pose file was saved to 'screenshot_pcl_viewer.png'" << std::endl;
+}
+
 int SequenceViewer::run()
 {
     if (pcd_len == 0)
@@ -259,8 +267,10 @@ int SequenceViewer::run()
     }
     while (!viewer->wasStopped())
     {
-        viewer->spinOnce(100);
-        img_viewer->spinOnce(100);
+        viewer->spinOnce(33);
+        if (false) {
+            img_viewer->spinOnce(33);
+        }
         boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
     return 0;

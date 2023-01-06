@@ -32,12 +32,13 @@ public:
 
     SequenceViewer(std::string pcd_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path);
 
-    void load_pcd_files(const std::string pcd_path);
-    void load_point_cloud(const std::string pcd_file_path);
-    void load_annot_json(std::string pcd_file_path);
+    void load_files(const std::string file_path, std::string target_ext = ".pcd");
+    int load_point_cloud(const std::string pcd_file_path, PointCloudT::Ptr pcd_ptr);
     void update_cloud(int pcd_id);
-    void save_camerapose();
+    void update_image(int pcd_id);
+    void load_annot_json(std::string pcd_file_path);
     void load_camerapose(std::string cameraparam_path);
+    void save_camerapose();
     void save_screenshot();
 
     void showBBox3D(const BBox3D &bbox);
