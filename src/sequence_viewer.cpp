@@ -11,11 +11,8 @@ SequenceViewer::SequenceViewer(
 {
     cloud.reset(new PointCloudT);
     viewer.reset(new pcl::visualization::PCLVisualizer("3D Viewer"));
-    if (false) {
-        img_viewer.reset(new pcl::visualization::ImageViewer("Image Viewer"));
-    }
 
-    load_files(pcd_path, ".pcd");
+    load_pcd_files(pcd_path, ".pcd");
 
     load_point_cloud(pcd_files[current_pcd_id], cloud);
     apply_color(cloud);
@@ -24,20 +21,25 @@ SequenceViewer::SequenceViewer(
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
 
     viewer->addCoordinateSystem();
+    viewer->addText(pcd_files[current_pcd_id], 0, 0, 0, 0, 0, "file_name");
+
+    viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
+    viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
+
+    if (!img_path.empty()) {
+        img_viewer.reset(new pcl::visualization::ImageViewer("Image Viewer"));
+    }
+    update_image(pcd_files[current_pcd_id]);
+
+    load_annot_json(pcd_files[current_pcd_id]);
 
     if (!cameraparam_path.empty())
     {
         load_camerapose(cameraparam_path);
     }
-
-    load_annot_json(pcd_files[current_pcd_id]);
-    viewer->addText(pcd_files[current_pcd_id], 0, 0, 0, 0, 0, "file_name");
-
-    viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
-    viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
 }
 
-void SequenceViewer::load_files(const std::string file_path, std::string target_ext)
+void SequenceViewer::load_pcd_files(const std::string file_path, std::string target_ext)
 {
     namespace bfs = boost::filesystem;
 
@@ -128,6 +130,8 @@ void SequenceViewer::update_cloud(int pcd_id)
             this->viewer->updatePointCloud(this->cloud, "cloud");
             this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
 
+            this->update_image(pcd_file);
+
             // this->viewer->removeShape("center");
             this->viewer->removeAllShapes();
             this->load_annot_json(pcd_file);
@@ -136,27 +140,59 @@ void SequenceViewer::update_cloud(int pcd_id)
     }
 }
 
-void SequenceViewer::update_image(int pcd_id) {
-    std::string image_path = "";
-    cv::Mat image = cv::imread(image_path);
-    unsigned width = image.cols;
-    unsigned height = image.rows;
-    unsigned channels = image.channels();
-    // unsigned channels = 3;
-    unsigned char data[width * height * channels];
-    for (int h = 0; h < height; h++) {
-        for (int w = 0; w < width; w++) {
-            cv::Vec3b intensity = image.at<cv::Vec3b>(h, w);
-            for (int c = 0; c < channels; c++) {
-                int addr_id = h * width * channels + w * channels + c;
-                uchar pixel_color   = intensity.val[channels - 1 - c];
-                data[addr_id] = pixel_color;
-            }
+void SequenceViewer::load_image(std::string pcd_file_path, std::string target_ext) {
+    namespace bfs = boost::filesystem;
+
+    std::string img_p = this->img_path;
+    bfs::path bfs_img_p (img_p);
+
+    if (!bfs::exists(bfs_img_p))
+    {
+        std::cout << (boost::format("Warning : annotaion path '%1%' does not exist.") % img_p).str() << std::endl;
+    }
+    else 
+    {
+        bool ret = false;
+
+        if (bfs::is_directory(bfs_img_p)) 
+        {
+            std::string file_name = bfs::path(pcd_file_path).stem().string();
+            std::string img_file =  (bfs_img_p / (file_name + target_ext)).string();
+            std::cout << "loading : " << img_file << std::endl;
+
+            this->image = cv::imread(img_file);
+        } 
+        else if (bfs_img_p.extension().string() == target_ext)
+        {
+            this->image = cv::imread(img_p);
         }
     }
+}
 
-    img_viewer->removeLayer("rgb_image");
-    img_viewer->showRGBImage(data, width, height, "rgb_image", 1.0);
+void SequenceViewer::update_image(const std::string pcd_file_path) {
+    if (!this->img_path.empty()) {
+        load_image(pcd_file_path);
+
+        unsigned width = this->image.cols;
+        unsigned height = this->image.rows;
+        unsigned channels = this->image.channels();
+
+        // TODO : check if no error occurs because of static variable `data`.
+        unsigned char data[width * height * channels];
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                cv::Vec3b intensity = this->image.at<cv::Vec3b>(h, w);
+                for (int c = 0; c < channels; c++) {
+                    int addr_id = h * width * channels + w * channels + c;
+                    uchar pixel_color   = intensity.val[channels - 1 - c];
+                    data[addr_id] = pixel_color;
+                }
+            }
+        }
+
+        this->img_viewer->removeLayer("rgb_image");
+        this->img_viewer->showRGBImage(data, width, height, "rgb_image", 1.0);
+    }
 }
 
 void SequenceViewer::load_annot_json(std::string pcd_file_path)
@@ -262,7 +298,7 @@ int SequenceViewer::run()
     while (!viewer->wasStopped())
     {
         viewer->spinOnce(33);
-        if (false) {
+        if (!this->img_path.empty()) {
             img_viewer->spinOnce(33);
         }
         boost::this_thread::sleep(boost::posix_time::milliseconds(100));
