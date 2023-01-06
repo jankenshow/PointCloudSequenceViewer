@@ -71,9 +71,9 @@ We add extra KeyDownEvents below.
 - [ ] image viewer  
     - [x] option  
     - [x] viewer sample  
-    - [ ] show viewer if given option
-    - [ ] load image
-    - [ ] toggle images related to pcd (register callback)  
+    - [x] show viewer if given option
+    - [x] load image
+    - [x] toggle images related to pcd (register callback)  
     - [ ] bbox2d  
 - [ ] Function to load multiple array of 3d bboxes/labels, in which an element (list of 3d bboxes/labels) is corresponding to single pcd_file.  
     - [x] load single frame annotation file(3d bboxes/labels).  
