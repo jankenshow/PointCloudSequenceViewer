@@ -30,7 +30,7 @@ public:
     int pcd_len;
     int current_pcd_id;
 
-    SequenceViewer(std::string pcd_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path);
+    SequenceViewer(std::string pcd_path, std::string img_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path);
 
     void load_files(const std::string file_path, std::string target_ext = ".pcd");
     int load_point_cloud(const std::string pcd_file_path, PointCloudT::Ptr pcd_ptr);
@@ -46,6 +46,7 @@ public:
     int run();
 
 protected:
+    std::string img_path;
     std::string annot_path;
     std::vector<std::string> pcd_files;
     PointCloudT::Ptr cloud;

@@ -2,9 +2,10 @@
 #include "pointcloud_processing.h"
 
 SequenceViewer::SequenceViewer(
-    std::string pcd_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path
+    std::string pcd_path, std::string img_path, std::string annot_path, std::string cameraparam_path, std::string cameraparam_save_path
 ) : pcd_len(0),
     current_pcd_id(0),
+    img_path(img_path),
     annot_path(annot_path),
     cameraparam_save_path(cameraparam_save_path)
 {
@@ -140,22 +141,15 @@ void SequenceViewer::update_image(int pcd_id) {
     cv::Mat image = cv::imread(image_path);
     unsigned width = image.cols;
     unsigned height = image.rows;
-    // int channels = image.channels();
-    unsigned channels = 3;
+    unsigned channels = image.channels();
+    // unsigned channels = 3;
     unsigned char data[width * height * channels];
     for (int h = 0; h < height; h++) {
         for (int w = 0; w < width; w++) {
-            // int addr_id = (h + 1) * w * 3;
             cv::Vec3b intensity = image.at<cv::Vec3b>(h, w);
-            // uchar blue  = intensity.val[0];
-            // uchar green = intensity.val[1];
-            // uchar red   = intensity.val[2];
-            // data[addr_id] = red;
-            // data[addr_id + 1] = green;
-            // data[addr_id + 2] = blue;
-            for (int c = 0; c < 3; c++) {
-                int addr_id = h * width * 3 + w * 3 + c;
-                uchar pixel_color   = intensity.val[2 - c];
+            for (int c = 0; c < channels; c++) {
+                int addr_id = h * width * channels + w * channels + c;
+                uchar pixel_color   = intensity.val[channels - 1 - c];
                 data[addr_id] = pixel_color;
             }
         }
