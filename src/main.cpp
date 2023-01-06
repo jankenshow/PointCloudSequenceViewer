@@ -17,6 +17,9 @@ int main(int argc, char *argv[])
         ("pcd_path,",
         bops::value<std::string>(),
         "path to pcd file or directory in which pcd files exist")
+        ("img_path,",
+        bops::value<std::string>(),
+        "path to image file or directory in which image files exist")
         ("annotation_path,",
         bops::value<std::string>(),
         "path to directory in which annotation files exist")
@@ -64,6 +67,16 @@ int main(int argc, char *argv[])
         std::cout << description << std::endl;
     }
 
+    std::string img_path;
+    if (vm.count("img_path"))
+    {
+        img_path = vm["img_path"].as<std::string>();
+    } 
+    else
+    {
+        img_path = "";
+    }
+
     std::string annot_path;
     if (vm.count("annotation_path"))
     {
@@ -107,7 +120,7 @@ int main(int argc, char *argv[])
         cameraparam_save_path = "camerapose.cam";
     }
 
-    SequenceViewer viewer(pcd_path, annot_path, cameraparam_path, cameraparam_save_path);
+    SequenceViewer viewer(pcd_path, img_path, annot_path, cameraparam_path, cameraparam_save_path);
     int res;
     res = viewer.run();
     return res;
