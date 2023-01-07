@@ -26,12 +26,12 @@ SequenceViewer::SequenceViewer(
     viewer->registerKeyboardCallback(keyboardEventOccurred, (void *)this);
     viewer->registerPointPickingCallback(pointPickingEventOccured, (void*)this); 
 
+    update_annot(pcd_files[current_pcd_id]);
+
     if (!img_path.empty()) {
         img_viewer.reset(new pcl::visualization::ImageViewer("Image Viewer"));
     }
     update_image(pcd_files[current_pcd_id]);
-
-    load_annot_json(pcd_files[current_pcd_id]);
 
     if (!cameraparam_path.empty())
     {
@@ -130,12 +130,12 @@ void SequenceViewer::update_cloud(int pcd_id)
             this->viewer->updatePointCloud(this->cloud, "cloud");
             this->viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "cloud");
 
-            this->update_image(pcd_file);
-
             // this->viewer->removeShape("center");
             this->viewer->removeAllShapes();
-            this->load_annot_json(pcd_file);
             this->viewer->addText(this->pcd_files[pcd_id], 0, 0, 0, 0, 0, "file_name");
+            this->update_annot(pcd_file);
+
+            this->update_image(pcd_file);
         }
     }
 }
@@ -170,7 +170,8 @@ void SequenceViewer::load_image(std::string pcd_file_path, std::string target_ex
 }
 
 void SequenceViewer::update_image(const std::string pcd_file_path) {
-    if (!this->img_path.empty()) {
+    if (!this->img_path.empty()) 
+    {
         load_image(pcd_file_path);
 
         unsigned width = this->image.cols;
@@ -204,49 +205,52 @@ void SequenceViewer::load_annot_json(std::string pcd_file_path)
 
     this->bboxes.clear();
 
-    if (!annot_p.empty())
+    if (!bfs::exists(bfs_annot_p))
     {
-        if (!bfs::exists(bfs_annot_p))
+        std::cout << (boost::format("Warning : annotaion path '%1%' does not exist.") % annot_p).str() << std::endl;
+    }
+    else 
+    {
+        bool ret = false;
+
+        if (bfs::is_directory(bfs_annot_p)) 
         {
-            std::cout << (boost::format("Warning : annotaion path '%1%' does not exist.") % annot_p).str() << std::endl;
+            std::string file_name = bfs::path(pcd_file_path).stem().string();
+            std::string annot_file =  (bfs_annot_p / (file_name + ".json")).string();
+            std::cout << "loading : " << annot_file << std::endl;
+
+            ret = load_annot(annot_file, this->bboxes);
+        } 
+        else if (bfs_annot_p.extension().string() == ".json")
+        {
+            ret = load_annot(annot_p, this->bboxes);
         }
-        else 
+
+        if (!ret)
         {
-            bool ret = false;
+            std::cout << (boost::format("Warning : annotaion path '%1%' was skipped.") % annot_p).str() << std::endl;
+            std::cout << "check file format." << std::endl;
+        }
+    }
+}
 
-            if (bfs::is_directory(bfs_annot_p)) 
-            {
-                std::string file_name = bfs::path(pcd_file_path).stem().string();
-                std::string annot_file =  (bfs_annot_p / (file_name + ".json")).string();
-                std::cout << "loading : " << annot_file << std::endl;
+void SequenceViewer::update_annot(std::string pcd_file_path) {
+    if (!this->annot_path.empty())
+    {
+        load_annot_json(pcd_file_path);
 
-                ret = load_annot(annot_file, this->bboxes);
-            } 
-            else if (bfs_annot_p.extension().string() == ".json")
-            {
-                ret = load_annot(annot_p, this->bboxes);
-            }
-
-            if (!ret)
-            {
-                std::cout << (boost::format("Warning : annotaion path '%1%' was skipped.") % annot_p).str() << std::endl;
-                std::cout << "check file format." << std::endl;
-            }
-
-            for (BBox3D bbox : this->bboxes) 
-            {
-                // if (bbox.id.find("person") != std::string::npos)
-                // {
-                //     std::cout << "load-bbox : " << bbox.id << std::endl;
-                //     showBBox3D(bbox);
-                // }
-                std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
-                std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
-                std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
-                std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
-                this->showBBox3D(bbox);
-                std::cout << "loaded" << std::endl;
-            }
+        for (BBox3D bbox : this->bboxes) 
+        {
+            // if (bbox.id.find("person") != std::string::npos)
+            // {
+            //     std::cout << "load-bbox : " << bbox.id << std::endl;
+            //     showBBox3D(bbox);
+            // }
+            std::cout << "load-bbox : " << bbox.id << " : " << std::endl;
+            std::cout << "    (x, y, z) = (" << bbox.translation.x() << "," << bbox.translation.y() << "," << bbox.translation.z() << ")" << std::endl;
+            std::cout << "    (w, h, d) = (" << bbox.width << "," << bbox.height << "," << bbox.depth << ")" << std::endl;
+            std::cout << "    (w, x, y, z) = (" << bbox.rotation.w() << "," << bbox.rotation.x() << "," << bbox.rotation.y() << "," << bbox.rotation.z() << ")" << std::endl;
+            this->showBBox3D(bbox);
         }
     }
 }

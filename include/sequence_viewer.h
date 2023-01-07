@@ -38,6 +38,7 @@ public:
     void load_image(std::string pcd_file_path, std::string target_ext = ".png");
     void update_image(std::string pcd_file_path);
     void load_annot_json(std::string pcd_file_path);
+    void update_annot(std::string pcd_file_path);
     void load_camerapose(std::string cameraparam_path);
     void save_camerapose();
     void save_screenshot();
